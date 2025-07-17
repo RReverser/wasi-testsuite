@@ -33,16 +33,20 @@ unsafe fn test_fd_filestat_set(dir_fd: wasi::Fd) {
     let stat = wasi::fd_filestat_get(file_fd).expect("failed filestat 2");
     assert_eq!(stat.size, 100, "file size should be 100");
 
-    // Check fd_filestat_set_times
+    // Check fd_filestat_set_times with 1ms granularity
     let old_atim = stat.atim;
-    let new_mtim = stat.mtim - 100;
+    let new_mtim = (stat.mtim / 1000000 - 1) * 1000000;
     wasi::fd_filestat_set_times(file_fd, new_mtim, new_mtim, wasi::FSTFLAGS_MTIM)
         .expect("fd_filestat_set_times");
 
     let stat = wasi::fd_filestat_get(file_fd).expect("failed filestat 3");
     assert_eq!(stat.size, 100, "file size should remain unchanged at 100");
     assert_eq!(stat.mtim, new_mtim, "mtim should change");
-    assert_eq!(stat.atim, old_atim, "atim should not change");
+    assert_eq!(
+        stat.atim / 1000000,
+        old_atim / 1000000,
+        "atim should not change"
+    );
 
     // let status = wasi_fd_filestat_set_times(file_fd, new_mtim, new_mtim, wasi::FILESTAT_SET_MTIM | wasi::FILESTAT_SET_MTIM_NOW);
     // assert_eq!(status, wasi::EINVAL, "ATIM & ATIM_NOW can't both be set");

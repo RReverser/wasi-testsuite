@@ -76,8 +76,8 @@ unsafe fn test_path_filestat(dir_fd: wasi::Fd) {
     let file_stat = wasi::path_filestat_get(dir_fd, 0, "file").expect("reading file stats");
     assert_eq!(file_stat.size, 0, "file size should be 0");
 
-    // Check path_filestat_set_times
-    let new_mtim = file_stat.mtim - 100;
+    // Check path_filestat_set_times with 1ms granularity
+    let new_mtim = (file_stat.mtim / 1000000 - 1) * 1000000;
     wasi::path_filestat_set_times(dir_fd, 0, "file", 0, new_mtim, wasi::FSTFLAGS_MTIM)
         .expect("path_filestat_set_times should succeed");
 
