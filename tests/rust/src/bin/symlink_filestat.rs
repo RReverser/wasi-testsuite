@@ -36,7 +36,7 @@ unsafe fn test_path_filestat(dir_fd: wasi::Fd) {
     let sym_stat = wasi::path_filestat_get(dir_fd, 0, "symlink").expect("reading symlink stats");
 
     // Modify mtim of symlink
-    let sym_new_mtim = sym_stat.mtim - 200;
+    let sym_new_mtim = (sym_stat.mtim / 1000000 - 1) * 1000000;
     wasi::path_filestat_set_times(dir_fd, 0, "symlink", 0, sym_new_mtim, wasi::FSTFLAGS_MTIM)
         .expect("path_filestat_set_times should succeed on symlink");
 
