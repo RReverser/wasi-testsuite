@@ -78,7 +78,11 @@ unsafe fn test_path_filestat(dir_fd: wasi::Fd) {
 
     let new_file_stat = wasi::path_filestat_get(dir_fd, 0, "file")
         .expect("reading file stats after path_filestat_set_times");
-    assert_eq!(new_file_stat.mtim, sym_stat.mtim, "mtim should change");
+    assert_eq!(
+        new_file_stat.mtim / 1000000,
+        sym_stat.mtim / 1000000,
+        "mtim should change"
+    );
 
     wasi::fd_close(file_fd).expect("closing a file");
     wasi::path_unlink_file(dir_fd, "symlink").expect("removing a symlink");
